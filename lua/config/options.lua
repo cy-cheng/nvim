@@ -2,7 +2,7 @@
 
 -- Line number settings
 vim.opt.cursorline = true
-vim.opt.cursorlineopt = "number"
+vim.opt.cursorlineopt = "both"
 vim.opt.number = true       -- Absolute line numbers
 vim.opt.relativenumber = true -- Relative line numbers
 
