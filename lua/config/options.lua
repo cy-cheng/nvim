@@ -6,6 +6,8 @@ vim.opt.cursorlineopt = "both"
 vim.opt.number = true       -- Absolute line numbers
 vim.opt.relativenumber = true -- Relative line numbers
 
+vim.opt.updatetime = 500    -- Faster completion
+
 -- Indentation settings
 vim.opt.tabstop = 4         -- Sets the width of a tab to 4 spaces
 vim.opt.shiftwidth = 4      -- Indentation level of 4 spaces

@@ -1,7 +1,12 @@
 local cmp = require("cmp")
 local luasnip = require("luasnip")
 
+vim.g.copilot_no_tab_map = true
+
 cmp.setup({
+  completion = {
+      max_items_count = 15,
+  },
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
@@ -26,10 +31,20 @@ cmp.setup({
         fallback()
       end
     end, { "i", "s" }),
-    ["<CR>"] = cmp.mapping.confirm({ select = true }),
+    ["<CR>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.confirm({ select = true })
+      elseif vim.fn["copilot#Accept"]() == 1 then
+        -- If Copilot suggestion is present, accept it
+        vim.fn["copilot#Accept('<CR>')"]()
+      else
+        fallback()  -- Fall back to normal <CR> behavior
+      end
+    end, { "i", "s" }),
   }),
   sources = cmp.config.sources({
     { name = "nvim_lsp" },
+    { name = "copilot"},
     { name = "luasnip" },
     { name = "buffer" },
     { name = "path" },

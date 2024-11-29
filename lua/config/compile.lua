@@ -6,11 +6,11 @@ local M = {}
 local commands = {
     cpp = function(filename)
         local output = filename:gsub("%.%w+$", "")
-        return "g++ " .. filename .. " -o " .. output .. " && ./" .. output
+        return "g++ " .. filename .. " -DLOCAL -o" .. output .. " && ./" .. output
     end,
     c = function(filename)
         local output = filename:gsub("%.%w+$", "")
-        return "gcc " .. filename .. " -o " .. output .. " && ./" .. output
+        return "gcc " .. filename .. " -DLOCAL -o" .. output .. " && ./" .. output
     end,
     python = function(filename)
         return "python3 " .. filename
@@ -42,7 +42,7 @@ function M.setup()
     vim.api.nvim_create_user_command("CompileAndRun", M.compile_and_run, {})
 
     -- Define the keybinding to trigger :CompileAndRun
-    vim.api.nvim_set_keymap("n", "<leader>r", ":CompileAndRun<CR>i", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<leader>r", ":w<CR>:CompileAndRun<CR>i", { noremap = true, silent = true })
 end
 
 return M

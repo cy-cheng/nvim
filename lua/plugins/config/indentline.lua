@@ -1,3 +1,7 @@
 -- plugins/config/indentline.lua
 
-equire("ibl").setup({})
+require("ibl").setup({
+	char = "|",
+	filetype_exclude = { "help", "dashboard", "packer", "NvimTree", "terminal" },
+	buftype_exclude = { "terminal" },
+})
