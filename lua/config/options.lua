@@ -16,3 +16,5 @@ vim.opt.scrolloff = 10      -- Keeps 10 lines visible when scrolling
 vim.opt.smartindent = true  -- Automatically smart-indents new lines
 vim.opt.expandtab = true
 
+vim.opt.splitbelow = true   -- Set the split window to be below the current window
+

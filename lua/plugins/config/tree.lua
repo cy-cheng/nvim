@@ -44,10 +44,7 @@ nvim_tree.setup({
     },
 
     -- Filtering and Git
-    filters = {
-        dotfiles = false,          -- Show or hide dotfiles
-        custom = { "node_modules", ".cache" },  -- Hide specified directories
-    },
+    filters = {},
     git = {
         enable = true,             -- Show git status icons
         ignore = false,            -- Show files ignored by .gitignore

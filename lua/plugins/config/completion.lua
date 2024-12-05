@@ -1,8 +1,6 @@
 local cmp = require("cmp")
 local luasnip = require("luasnip")
 
-vim.g.copilot_no_tab_map = true
-
 cmp.setup({
   completion = {
       max_items_count = 15,

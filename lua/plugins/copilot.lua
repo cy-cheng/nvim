@@ -6,11 +6,12 @@ return {
     -- Copilot Chat plugin
         {
             "CopilotC-Nvim/CopilotChat.nvim",
+            branch = "main",
             dependencies = {
-                "nvim-lua/plenary.nvim" 
+                "nvim-lua/plenary.nvim",
             },
             config = function()
-                require("CopilotChat").setup({})
+                require("plugins.config.copilot")
             end,
         },
 
