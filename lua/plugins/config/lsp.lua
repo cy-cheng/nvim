@@ -27,7 +27,7 @@ vim.api.nvim_create_autocmd("CursorHold", {
     end,
 })
 
--- Enable LSP servers for Python, C++, LaTeX
+-- Enable LSP servers for Python, C, C++, LaTeX
 lspconfig.pyright.setup({
     settings = {
         python = {
@@ -39,15 +39,14 @@ lspconfig.pyright.setup({
     }
 })
 
-
 lspconfig.clangd.setup({
-    cmd = { "clangd" },
-    init_options = {
-        compilationDatabaseCommand = "c++",
-        fallbackFlags = { "--std=c++17", "-DLOCAL" },
-    },
-})     -- C++ LSP
-lspconfig.texlab.setup({})    -- LaTeX LSP
+    cmd = { "clangd" }, -- Default command
+    filetypes = { "c", "cpp" }, -- Ensure clangd works for both C and C++
+})
+
+
+lspconfig.texlab.setup({}) -- LaTeX LSP
+
 lspconfig.lua_ls.setup({
     settings = {
         Lua = {

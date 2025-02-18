@@ -18,6 +18,8 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+vim.cmd [[ autocmd BufRead,BufNewFile *.c set filetype=c ]] 
+
 require("lazy").setup("plugins")  -- Load plugins from `plugins/` folder
 
 require("config.keymaps")
