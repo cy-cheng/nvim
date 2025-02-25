@@ -14,18 +14,34 @@ return {
         "folke/tokyonight.nvim",     -- Theme
         config = function()
             require("tokyonight").setup({
-                transparent = true
+                transparent = true,
+                styles = {
+                    sidebars = "transparent",
+                    float = "transparent",
+                }
             })
             vim.cmd("colorscheme tokyonight")  -- Apply theme
         end,
     },
     {
-        "nvim-tree/nvim-tree.lua",
-        dependencies = { "nvim-tree/nvim-web-devicons" }, -- Optional icons
+        "nvim-neo-tree/neo-tree.nvim",
+        branch = "v3.x",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+            "MunifTanjim/nui.nvim",
+            -- {"3rd/image.nvim", opts = {}}, -- Optional image support in preview window: See `# Preview Mode` for more information
+        },
         config = function()
-            require("plugins.config.tree")
         end,
     },
+--  {
+--      "nvim-tree/nvim-tree.lua",
+--      dependencies = { "nvim-tree/nvim-web-devicons" }, -- Optional icons
+--      config = function()
+--          require("plugins.config.tree")
+--      end,
+--  },
     {
         "lukas-reineke/indent-blankline.nvim",
         event = "BufReadPre",
@@ -47,5 +63,23 @@ return {
           -- …etc.
         },
     },
+    {
+        "folke/noice.nvim",
+        event = "VeryLazy",
+        config = function()
+            require("plugins.config.popup")
+        end,
+        opts = {
+            -- add any options here
+        },
+        dependencies = {
+            -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+            "MunifTanjim/nui.nvim",
+            -- OPTIONAL:
+            --   `nvim-notify` is only needed, if you want to use the notification view.
+            --   If not available, we use `mini` as the fallback
+            "rcarriga/nvim-notify",
+        }
+    }
 }
 
