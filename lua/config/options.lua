@@ -1,5 +1,7 @@
 -- options.lua
 
+vim.cmd("filetype plugin indent on") -- Enable filetype detection, plugins, and indentation
+
 -- Line number settings
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "both"
