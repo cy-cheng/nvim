@@ -46,6 +46,7 @@ lspconfig.clangd.setup({
 
 
 lspconfig.texlab.setup({}) -- LaTeX LSP
+lspconfig.bashls.setup({}) -- Bash LSP
 
 lspconfig.lua_ls.setup({
     settings = {

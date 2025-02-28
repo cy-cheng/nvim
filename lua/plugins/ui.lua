@@ -1,7 +1,7 @@
 -- plugins/ui.lua
 return {
     {
-        "nvim-lualine/lualine.nvim",     -- Status line
+        "nvim-lualine/lualine.nvim", -- Status line
         config = function()
             require("lualine").setup({
                 options = {
@@ -11,7 +11,7 @@ return {
         end,
     },
     {
-        "folke/tokyonight.nvim",     -- Theme
+        "folke/tokyonight.nvim", -- Theme
         config = function()
             require("tokyonight").setup({
                 transparent = true,
@@ -20,7 +20,7 @@ return {
                     float = "transparent",
                 }
             })
-            vim.cmd("colorscheme tokyonight")  -- Apply theme
+            vim.cmd("colorscheme tokyonight") -- Apply theme
         end,
     },
     {
@@ -36,51 +36,61 @@ return {
             require("plugins.config.tree")
         end,
     },
---  {
---      "nvim-tree/nvim-tree.lua",
---      dependencies = { "nvim-tree/nvim-web-devicons" }, -- Optional icons
---      config = function()
---          require("plugins.config.tree")
---      end,
---  },
+    --  {
+    --      "nvim-tree/nvim-tree.lua",
+    --      dependencies = { "nvim-tree/nvim-web-devicons" }, -- Optional icons
+    --      config = function()
+    --          require("plugins.config.tree")
+    --      end,
+    --  },
     {
         "lukas-reineke/indent-blankline.nvim",
         event = "BufReadPre",
         config = function()
-			require("ibl").setup()
+            require("ibl").setup()
         end
     },
     {
         'romgrk/barbar.nvim',
         dependencies = {
-          'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
-          'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
+            'lewis6991/gitsigns.nvim',   -- OPTIONAL: for git status
+            'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
         },
         init = function() vim.g.barbar_auto_setup = false end,
         opts = {
-          -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
-          -- animation = true,
-          -- insert_at_start = true,
-          -- …etc.
+            -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
+            -- animation = true,
+            -- insert_at_start = true,
+            -- …etc.
         },
     },
     {
-        "folke/noice.nvim",
-        event = "VeryLazy",
+        "nvim-treesitter/nvim-treesitter",
+        build = ":TSUpdate",
         config = function()
-            require("plugins.config.popup")
+            require("nvim-treesitter.configs").setup({
+                ensure_installed = { "bash" },
+                highlight = { enable = true },
+            })
         end,
-        opts = {
-            -- add any options here
-        },
-        dependencies = {
-            -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
-            "MunifTanjim/nui.nvim",
-            -- OPTIONAL:
-            --   `nvim-notify` is only needed, if you want to use the notification view.
-            --   If not available, we use `mini` as the fallback
-            "rcarriga/nvim-notify",
-        }
-    }
+    },
 }
 
+--    {
+--        "folke/noice.nvim",
+--        event = "VeryLazy",
+--        config = function()
+--            require("plugins.config.popup")
+--        end,
+--        opts = {
+--            -- add any options here
+--        },
+--        dependencies = {
+--            -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+--            "MunifTanjim/nui.nvim",
+--            -- OPTIONAL:
+--            --   `nvim-notify` is only needed, if you want to use the notification view.
+--            --   If not available, we use `mini` as the fallback
+--            "rcarriga/nvim-notify",
+--        }
+--    }
