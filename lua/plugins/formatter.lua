@@ -8,6 +8,7 @@ return {
                 formatters_by_ft = {
                     c = { "clang-format" },
                     cpp = { "clang-format" },
+                    ino = { "clang-format" },
                     python = { "black" },
                     lua = { "lua-format" },
                     tex = { "latexindent" },
