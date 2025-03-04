@@ -74,8 +74,6 @@ return {
             })
         end,
     },
-}
-
 --    {
 --        "folke/noice.nvim",
 --        event = "VeryLazy",
@@ -93,4 +91,7 @@ return {
 --            --   If not available, we use `mini` as the fallback
 --            "rcarriga/nvim-notify",
 --        }
---    }
+--    },
+}
+
+
