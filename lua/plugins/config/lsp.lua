@@ -39,8 +39,19 @@ lspconfig.pyright.setup({
 })
 
 lspconfig.clangd.setup({
-    cmd = { "clangd" }, -- Default command
-    filetypes = { "c", "cpp", "ino" }, -- Ensure clangd works for both C and C++
+    cmd = { "clangd" },
+    filetypes = { "c", "cpp" }, -- Ensure clangd works for both C and C++
+})
+
+lspconfig.arduino_language_server.setup({
+    cmd = {
+        "arduino-language-server",
+        "-clangd", "/usr/bin/clangd",
+        "-cli", "/usr/bin/arduino-cli",
+        "-cli-config", "/home/brine-ubuntu/snap/arduino-cli/57/.arduino15/arduino-cli.yaml",
+    },
+    filetypes = { "arduino", "ino" }, -- Ensure the language server works for Arduino files
+    root_dir = lspconfig.util.root_pattern("*.ino", ".git"),
 })
 
 
