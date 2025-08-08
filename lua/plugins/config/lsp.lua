@@ -3,9 +3,9 @@
 local lspconfig = require("lspconfig")
 
 vim.diagnostic.config({
-    virtual_text = false, -- Disable inline diagnostics
-    signs = true,         -- Keep signs in the gutter
-    underline = true,     -- Underline the text with diagnostics
+    virtual_text = false,     -- Disable inline diagnostics
+    signs = true,             -- Keep signs in the gutter
+    underline = true,         -- Underline the text with diagnostics
     update_in_insert = false, -- Disable updates in insert mode
 })
 
@@ -18,7 +18,7 @@ vim.api.nvim_create_autocmd("CursorHold", {
             -- Check if any diagnostic severity is Warning or Error
             vim.diagnostic.open_float(nil, {
                 scope = "line",
-                focusable = false,  -- Non-interactive float
+                focusable = false, -- Non-interactive float
                 style = "minimal",
                 border = "rounded",
             })
@@ -31,15 +31,17 @@ lspconfig.pyright.setup({
     settings = {
         python = {
             analysis = {
-                typeCheckingMode = "off",  -- Disable type checking
-                diagnosticMode = "openFilesOnly",  -- Only show diagnostics for open files
+                typeCheckingMode = "off",         -- Disable type checking
+                diagnosticMode = "openFilesOnly", -- Only show diagnostics for open files
             }
         }
     }
 })
 
 lspconfig.clangd.setup({
-    cmd = { "clangd" },
+    cmd = {
+        "clangd", "compile-commands-dir=.",
+    },
     filetypes = { "c", "cpp" }, -- Ensure clangd works for both C and C++
 })
 
@@ -79,4 +81,3 @@ lspconfig.lua_ls.setup({
         },
     },
 })
-
