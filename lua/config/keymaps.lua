@@ -33,3 +33,6 @@ map("t", "jk", "<C-\\><C-n>", opts)
 map("i", "<C-J>", "copilot#Accept('<CR>')", { expr = true, silent = true })
 map("n", "<leader>c", ":CopilotChatToggle<CR>", opts)
 
+-- Notification options
+map("n", "<leader>nh", ":Noice dismiss<CR>", opts)
+
