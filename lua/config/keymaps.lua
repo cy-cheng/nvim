@@ -7,6 +7,7 @@ local opts = { noremap = true, silent = true }
 -- General options
 map("i", "jk", "<esc>", opts)
 map("i", "JK", "<esc>", opts)
+map("i", "{<S-CR>", "{<CR>}<ESC>ko", opts)
 map("n", "<Tab>", "A", opts)
 
 noctlmap({"n", "v"}, "H", "h", opts)
@@ -22,11 +23,6 @@ map("n", "<A-r>", ":BufferCloseAllButCurrentOrPinned<CR>", opts)
 map("n", "<A-x>", ":BufferClose<CR>", opts)
 map("n", "<C-h>", "<C-w>W", opts)
 map("n", "<C-l>", "<C-w>w", opts)
-
--- Tex options
-map("n", "<leader>vl", ":VimtexCompile<CR>", opts)
-map("n", "<leader>ve", ":VimtexErrors<CR>", opts)
-map("n", "<leader>vo", ":!zathura %:r.pdf &<CR><CR>", opts)
 
 -- Terminal options
 map("n", "<C-A-t>", ":belowright 10split | terminal<CR>i", opts)

@@ -7,7 +7,6 @@ vim.opt.cursorline = true
 vim.opt.cursorlineopt = "both"
 vim.opt.number = true       -- Absolute line numbers
 vim.opt.relativenumber = true -- Relative line numbers
-
 vim.opt.updatetime = 500    -- Faster completion
 
 -- Indentation settings
