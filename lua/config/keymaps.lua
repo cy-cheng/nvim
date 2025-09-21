@@ -36,3 +36,6 @@ map("n", "<leader>c", ":CopilotChatToggle<CR>", opts)
 -- Notification options
 map("n", "<leader>nh", ":Noice dismiss<CR>", opts)
 
+-- Typst commands
+map("n", "<leader>tc", ":TypstPreview<CR>", opts)
+

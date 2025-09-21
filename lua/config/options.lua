@@ -1,6 +1,9 @@
 -- options.lua
 
 vim.cmd("filetype plugin indent on") -- Enable filetype detection, plugins, and indentation
+vim.opt.encoding = 'utf-8'
+vim.opt.fileencodings = 'ucs-bom,utf-8,gbk,big5,gb18030,default,latin1'
+
 
 -- Line number settings
 vim.opt.cursorline = true
@@ -18,4 +21,5 @@ vim.opt.smartindent = true  -- Automatically smart-indents new lines
 vim.opt.expandtab = true
 
 vim.opt.splitbelow = true   -- Set the split window to be below the current window
+vim.opt.splitright = true   -- Set the split window to be right of the current window
 
