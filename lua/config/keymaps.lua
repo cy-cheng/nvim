@@ -36,6 +36,14 @@ map("n", "<leader>c", ":CopilotChatToggle<CR>", opts)
 -- Notification options
 map("n", "<leader>nh", ":Noice dismiss<CR>", opts)
 
+-- Format options
+noctlmap({"n", "v"}, "<leader>ff", function()
+    require("conform").format({
+        async = true,
+        lsp_fallback = true,
+    })
+end, opts)
+
 -- Typst commands
 map("n", "<leader>tc", ":TypstPreview<CR>", opts)
 
