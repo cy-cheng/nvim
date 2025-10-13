@@ -12,7 +12,15 @@ return {
         event = "VeryLazy",
         opts = {
             top_down = false,
-
+            presets = {
+                lsp_doc_border = true,
+            },
+            routes = {
+                {
+                    filter = { event = "msg_showmode" },
+                    opts = { skip = true },
+                },
+            },
         },
         dependencies = {
             "MunifTanjim/nui.nvim",
