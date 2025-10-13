@@ -11,6 +11,10 @@ return {
                     sidebars = "transparent",
                     floats = "transparent",
                 },
+                -- this is a comment
+                on_highlights = function(hl, c)
+                    hl.Comment = { fg = "#999999", italic = true }
+                end,
             })
             require("tokyonight").load()
         end,

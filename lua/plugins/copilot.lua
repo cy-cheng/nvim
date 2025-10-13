@@ -5,6 +5,7 @@ return {
 
         config = function()
             vim.g.copilot_no_tab_map = true
+
         end,
     },
     {
@@ -22,7 +23,7 @@ return {
                 chat = {
                     adapter = {
                         name = "copilot",
-                        model = "claude-sonnet-4",
+                        model = "grok-code-fast-1",
                     },
                 },
             },
