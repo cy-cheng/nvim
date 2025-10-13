@@ -47,7 +47,7 @@ map("t", "jk", "<C-\\><C-n>", opts)
 
 -- Copilot options
 map("i", "<C-J>", "copilot#Accept('<CR>')", { expr = true, silent = true })
-map("n", "<leader>c", ":CodeCompanionChat<CR>", opts)
+map("n", "<leader>c", ":CodeCompanionChat Toggle<CR>", opts)
 
 -- Notification options
 map("n", "<leader>nh", ":Noice dismiss<CR>", opts)
