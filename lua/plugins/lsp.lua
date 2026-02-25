@@ -40,13 +40,30 @@ return {
 			})
 
 			-- LSP setup
-			local lspconfig = require("lspconfig")
+			-- vim.lsp.config()
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-			lspconfig.pyright.setup({ capabilities = capabilities })
-			lspconfig.clangd.setup({ capabilities = capabilities })
-			lspconfig.ts_ls.setup({ capabilities = capabilities })
-			lspconfig.tinymist.setup({ capabilities = capabilities })
+			vim.lsp.config("pyright", {
+				settings = {
+
+				},
+			})
+			vim.lsp.config("clangd", {
+				settings = {
+
+				},
+			})
+			vim.lsp.config("ts_ls", {
+				settings = {
+
+				},
+			})
+			vim.lsp.config("tinymist", {
+				settings = {
+
+				},
+			})
+
 
 			-- Show diagnostics in a floating window on CursorHold
 			vim.api.nvim_create_autocmd("CursorHold", {
