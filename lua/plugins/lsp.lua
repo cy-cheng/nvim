@@ -112,13 +112,9 @@ return {
 			}) ]]
 
 			-- LSP setup
-<<<<<<< Updated upstream
 			-- vim.lsp.config()
-			local capabilities = require("cmp_nvim_lsp").default_capabilities()
-=======
 			local lspconfig = require("lspconfig")
 			-- local capabilities = require("cmp_nvim_lsp").default_capabilities()
->>>>>>> Stashed changes
 
 			vim.lsp.config("pyright", {
 				settings = {
