@@ -1,6 +1,5 @@
 -- options.lua
 
-vim.cmd("filetype plugin indent on") -- Enable filetype detection, plugins, and indentation
 vim.opt.encoding = "utf-8"
 vim.opt.fileencodings = "ucs-bom,utf-8,gbk,big5,gb18030,default,latin1"
 

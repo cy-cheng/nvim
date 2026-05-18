@@ -6,7 +6,6 @@ local M = {}
 local commands = {
     cpp = function(filename)
         local output = filename:gsub("%.%w+$", "")
-        print(output)
         return "g++ " .. filename .. " -DLOCAL -o" .. output .. " && ./" .. output
     end,
     c = function(filename)

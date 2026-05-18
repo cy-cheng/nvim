@@ -3,7 +3,6 @@ return {
 		"OXY2DEV/markview.nvim",
 		lazy = false,
 		config = function()
-			local presets = require("markview.presets")
 			require("markview").setup({
 				markdown = {
 					headings = {
@@ -28,7 +27,9 @@ return {
 				preview = {
 					filetypes = { "markdown", "codecompanion" },
 					ignore_buftypes = {},
-					modes = { "n", "i" },
+					-- Render the preview only in normal mode; entering insert
+					-- mode shows the raw markdown for editing.
+					modes = { "n" },
 				},
 			})
 		end,

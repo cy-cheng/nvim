@@ -5,7 +5,7 @@ local function compile_typst(typ_path)
 	vim.cmd("silent write")
 
 	-- Start typst watch in background and open zathura after PDF exists
-	typst_watch_job_id = vim.fn.jobstart({ "typst", "compile", typ_path }, {
+	vim.fn.jobstart({ "typst", "compile", typ_path }, {
 		detach = true,
 		on_exit = function(_, code)
 			if code ~= 0 then

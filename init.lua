@@ -6,7 +6,7 @@ vim.g.mapleader = ','
 
 -- Ensure lazy.nvim is installed
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",
@@ -17,8 +17,6 @@ if not vim.loop.fs_stat(lazypath) then
     })
 end
 vim.opt.rtp:prepend(lazypath)
-
-vim.cmd [[ autocmd BufRead,BufNewFile *.c set filetype=c ]]
 
 require("lazy").setup("plugins") -- Load plugins from `plugins/` folder
 

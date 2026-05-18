@@ -1,6 +1,29 @@
 -- plugins/lsp_completion.lua
 -- LSP + autocompletion for C++, Python, TypeScript (ts_ls) with error popup on cursor hover
 
+-- Discover Python import roots for a project: the project root itself,
+-- plus any immediate child directory that holds a package (a subdir with
+-- __init__.py). pyright never runs a script's `sys.path.insert(...)`, so
+-- this feeds it those roots statically -- packages kept in nested dirs
+-- then resolve in any repo with no per-project pyrightconfig.json.
+local PY_SKIP_DIRS = { node_modules = true, __pycache__ = true }
+local function py_extra_paths(root)
+	local paths = { root }
+	for name, ty in vim.fs.dir(root) do
+		if ty == "directory" and not name:match("^%.") and not PY_SKIP_DIRS[name] then
+			local child = root .. "/" .. name
+			for sub, subty in vim.fs.dir(child) do
+				if subty == "directory"
+					and vim.uv.fs_stat(child .. "/" .. sub .. "/__init__.py") then
+					table.insert(paths, child)
+					break
+				end
+			end
+		end
+	end
+	return paths
+end
+
 return {
 	-- LSP and completion plugins
 	{
@@ -72,6 +95,23 @@ return {
 				vim.lsp.enable(server)
 			end
 
+			-- pyright resolves imports statically; hand it each project's
+			-- import roots (root + nested package dirs) so subdir packages
+			-- resolve everywhere without a per-project pyrightconfig.json.
+			vim.lsp.config("pyright", {
+				capabilities = capabilities,
+				before_init = function(init_params, config)
+					local root = config.root_dir
+						or (init_params.rootUri and vim.uri_to_fname(init_params.rootUri))
+					if not root then
+						return
+					end
+					config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
+						python = { analysis = { extraPaths = py_extra_paths(root) } },
+					})
+				end,
+			})
+
 			-- Show diagnostics in a floating window on CursorHold
 			vim.api.nvim_create_autocmd("CursorHold", {
 				pattern = "*",
@@ -79,8 +119,6 @@ return {
 					vim.diagnostic.open_float(nil, { focus = false, scope = "line" })
 				end,
 			})
-
-			vim.o.updatetime = 300
 
 			-- Diagnostic configuration
 			vim.diagnostic.config({
@@ -91,7 +129,8 @@ return {
 			})
 
 			-- Useful LSP keymaps
-			vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP Hover" })
+			-- `K` is remapped to `gk` in config/keymaps.lua, so hover lives on <leader>k.
+			vim.keymap.set("n", "<leader>k", vim.lsp.buf.hover, { desc = "LSP Hover" })
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "LSP Go Definition" })
 			vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "LSP References" })
 			vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "LSP Rename" })
@@ -100,9 +139,27 @@ return {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter",
+		-- The legacy `master` branch is archived and crashes on Neovim 0.12
+		-- (broken `set-lang-from-info-string!` directive). `main` is the
+		-- supported branch for Neovim 0.11+.
+		branch = "main",
+		lazy = false,
+		build = ":TSUpdate",
 		config = function()
-			require("nvim-treesitter.configs").setup({
-				ensure_installed = { "yaml", "json" },
+			-- The `main` branch compiles parsers with the `tree-sitter` CLI.
+			-- Skip the install when it is missing so startup stays error-free;
+			-- `markdown`/`markdown_inline` already ship with Neovim.
+			if vim.fn.executable("tree-sitter") == 1 then
+				require("nvim-treesitter").install({ "yaml", "json" })
+			end
+
+			-- The `main` branch no longer auto-enables highlighting;
+			-- opt in per filetype via `vim.treesitter.start()`.
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "yaml", "json", "markdown" },
+				callback = function()
+					pcall(vim.treesitter.start)
+				end,
 			})
 		end,
 	},
