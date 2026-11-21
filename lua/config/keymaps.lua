@@ -1,65 +1,41 @@
--- keymaps.lua
+-- keymaps.lua — your old maps, kept. Plugin maps live next to their plugin.
+-- Press "," or <Space> and wait: which-key shows everything available.
 
--- Map Q to save all and quit all
+local map = vim.keymap.set
+local opts = { noremap = true, silent = true }
+
+-- :Q saves everything and quits
 vim.api.nvim_create_user_command("Q", function()
     vim.cmd("wall")
     vim.cmd("qa")
 end, {})
 
-local noctlmap = vim.keymap.set -- cannot use <C-...> in lua
-local map = vim.api.nvim_set_keymap
-local opts = { noremap = true, silent = true }
+-- General
+map("i", "jk", "<Esc>", opts)
+map("i", "{<S-CR>", "{<CR>}<Esc>ko", opts)
+-- <Tab> in normal mode = "A" (or apply a Copilot next-edit suggestion; see plugins/ai.lua)
 
--- General options
-map("i", "jk", "<ESC>", opts)
-map("i", "{<S-CR>", "{<CR>}<ESC>ko", opts)
-map("n", "<Tab>", "A", opts)
+map({ "n", "v" }, "H", "b", opts)
+map({ "n", "v" }, "J", "gj", opts)
+map({ "n", "v" }, "K", "gk", opts)
+map({ "n", "v" }, "L", "w", opts)
 
-noctlmap({"n", "v"}, "H", "b", opts)
-noctlmap({"n", "v"}, "J", "gj", opts)
-noctlmap({"n", "v"}, "K", "gk", opts)
-noctlmap({"n", "v"}, "L", "w", opts)
-
--- Windows options
-map("n", "  ", ":Neotree toggle<CR>", opts)
-map("n", "<A-h>", ":BufferPrevious<CR>", opts)
-map("n", "<A-l>", ":BufferNext<CR>", opts)
-map("n", "<A-r>", ":BufferCloseAllButCurrentOrPinned<CR>", opts)
-map("n", "<A-c>", ":BufferClose<CR>", opts)
+-- Windows
 map("n", "<C-h>", "<C-w>W", opts)
 map("n", "<C-l>", "<C-w>w", opts)
 
-map("n", "<A-1>", ":BufferGoto 1<CR>", opts)
-map("n", "<A-2>", ":BufferGoto 2<CR>", opts)
-map("n", "<A-3>", ":BufferGoto 3<CR>", opts)
-map("n", "<A-4>", ":BufferGoto 4<CR>", opts)
-map("n", "<A-5>", ":BufferGoto 5<CR>", opts)
-map("n", "<A-6>", ":BufferGoto 6<CR>", opts)
-map("n", "<A-7>", ":BufferGoto 7<CR>", opts)
-map("n", "<A-8>", ":BufferGoto 8<CR>", opts)
-map("n", "<A-9>", ":BufferGoto 9<CR>", opts)
-map("n", "<A-0>", ":BufferLast<CR>", opts)
+-- Terminals
+map("n", "<C-A-t>", "<cmd>belowright 10split | terminal<CR>i", opts)
+map("n", "<C-A-v>", "<cmd>belowright 40vsplit | terminal<CR>i", opts)
+map("t", "jk", [[<C-\><C-n>]], opts)
+map("t", "<C-h>", [[<C-\><C-n><C-w>W]], opts)
+map("t", "<C-l>", [[<C-\><C-n><C-w>w]], opts)
 
--- Terminal options
-map("n", "<C-A-t>", ":belowright 10split | terminal<CR>i", opts)
-map("n", "<C-A-v>", ":belowright 40vsplit | terminal<CR>i", opts)
-map("t", "jk", "<C-\\><C-n>", opts)
+-- Formatting
+map({ "n", "v" }, "<leader>ff", function()
+    require("conform").format({ async = true, lsp_format = "fallback" })
+end, { desc = "Format" })
 
--- Copilot options
-map("i", "<C-J>", "copilot#Accept('<CR>')", { expr = true, silent = true })
-map("n", "<leader>c", ":CodeCompanionChat Toggle<CR>", opts)
-
--- Notification options
-map("n", "<leader>nh", ":Noice dismiss<CR>", opts)
-
--- Format options
-noctlmap({"n", "v"}, "<leader>ff", function()
-    require("conform").format({
-        async = true,
-        lsp_fallback = true,
-    })
-end, opts)
-
--- Typst commands
-map("n", "<leader>tc", ":TypstPreview<CR>", opts)
-
+-- Diagnostics
+map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Prev diagnostic" })
+map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next diagnostic" })

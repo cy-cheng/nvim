@@ -1,166 +1,170 @@
--- plugins/lsp_completion.lua
--- LSP + autocompletion for C++, Python, TypeScript (ts_ls) with error popup on cursor hover
+-- lsp.lua — language servers (native vim.lsp.config), completion, formatting, treesitter
 
--- Discover Python import roots for a project: the project root itself,
--- plus any immediate child directory that holds a package (a subdir with
--- __init__.py). pyright never runs a script's `sys.path.insert(...)`, so
--- this feeds it those roots statically -- packages kept in nested dirs
--- then resolve in any repo with no per-project pyrightconfig.json.
+-- Servers Mason installs and mason-lspconfig enables automatically.
+-- "copilot" = GitHub's copilot-language-server: inline suggestions + sidekick's next-edit suggestions.
+local servers = { "pyright", "ruff", "clangd", "ts_ls", "tinymist", "lua_ls", "copilot" }
+
+-- Discover Python import roots for a project: the project root itself plus any
+-- immediate child dir that holds a package (has a subdir with __init__.py).
+-- pyright never runs `sys.path.insert(...)`, so feed it those roots statically.
 local PY_SKIP_DIRS = { node_modules = true, __pycache__ = true }
 local function py_extra_paths(root)
-	local paths = { root }
-	for name, ty in vim.fs.dir(root) do
-		if ty == "directory" and not name:match("^%.") and not PY_SKIP_DIRS[name] then
-			local child = root .. "/" .. name
-			for sub, subty in vim.fs.dir(child) do
-				if subty == "directory"
-					and vim.uv.fs_stat(child .. "/" .. sub .. "/__init__.py") then
-					table.insert(paths, child)
-					break
-				end
-			end
-		end
-	end
-	return paths
+    local paths = { root }
+    for name, ty in vim.fs.dir(root) do
+        if ty == "directory" and not name:match("^%.") and not PY_SKIP_DIRS[name] then
+            local child = root .. "/" .. name
+            for sub, subty in vim.fs.dir(child) do
+                if subty == "directory" and vim.uv.fs_stat(child .. "/" .. sub .. "/__init__.py") then
+                    table.insert(paths, child)
+                    break
+                end
+            end
+        end
+    end
+    return paths
 end
 
 return {
-	-- LSP and completion plugins
-	{
-		"neovim/nvim-lspconfig",
-		dependencies = {
-			"williamboman/mason.nvim",
-			"williamboman/mason-lspconfig.nvim",
-			{
-				"saghen/blink.cmp",
-				version = "1.*",
-				---@module 'blink.cmp'
-				---@type blink.cmp.Config
-				opts = {
-					keymap = {
-						preset = "enter",
-						["<S-Tab>"] = { "select_prev", "fallback" },
-						["<Tab>"] = { "select_next", "fallback" },
-					},
+    {
+        "neovim/nvim-lspconfig",
+        event = { "BufReadPre", "BufNewFile" },
+        dependencies = {
+            { "mason-org/mason.nvim", opts = { ui = { border = "rounded" } } },
+            "mason-org/mason-lspconfig.nvim",
+            "saghen/blink.cmp",
+        },
+        config = function()
+            vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
 
-					appearance = {
-						nerd_font_variant = "mono",
-					},
+            vim.lsp.config("pyright", {
+                -- pyright pulls settings after start (workspace/configuration), so
+                -- extend the live client's settings and tell it they changed.
+                on_init = function(client)
+                    local root = client.root_dir
+                    if type(root) ~= "string" then return end -- single file, no project
+                    client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
+                        python = { analysis = { extraPaths = py_extra_paths(root) } },
+                    })
+                    client:notify("workspace/didChangeConfiguration", { settings = client.settings })
+                end,
+            })
+            -- ruff handles lint + format; pyright handles types/navigation.
+            vim.lsp.config("ruff", {
+                on_attach = function(client) client.server_capabilities.hoverProvider = false end,
+            })
 
-					completion = {
-						documentation = {
-							auto_show = true,
-							auto_show_delay_ms = 200
-						}
-					},
+            require("mason-lspconfig").setup({
+                ensure_installed = servers,
+                automatic_enable = true,
+            })
 
-					cmdline = {
-						keymap = { preset = "cmdline" },
-						sources = function()
-							local type = vim.fn.getcmdtype()
-							if type == "/" or type == "?" then return { "buffer" } end
-							if type == ":" then return { "cmdline" } end
-							return {}
-						end,
-					},
+            -- Copilot ghost text (Neovim 0.12 native). Accept with <C-j> in insert mode.
+            vim.lsp.inline_completion.enable(true)
+            vim.keymap.set("i", "<C-j>", function()
+                if not vim.lsp.inline_completion.get() then
+                    return "<C-j>"
+                end
+            end, { expr = true, desc = "Accept Copilot suggestion" })
 
-					sources = {
-						default = { "lsp", "path", "snippets", "buffer" },
-					},
+            vim.diagnostic.config({
+                virtual_text = true,
+                float = { border = "rounded" },
+                update_in_insert = false,
+                severity_sort = true,
+            })
+            -- Show the line's diagnostics in a float when the cursor rests.
+            vim.api.nvim_create_autocmd("CursorHold", {
+                callback = function()
+                    vim.diagnostic.open_float(nil, { focus = false, scope = "line" })
+                end,
+            })
 
-					fuzzy = { implementation = "prefer_rust_with_warning" },
-				},
-				opts_extend = { "sources.default" },
-			},
-			"L3MON4D3/LuaSnip",
-		},
-		config = function()
-			-- Mason setup
-			require("mason").setup()
-			require("mason-lspconfig").setup({
-				ensure_installed = { "pyright", "clangd", "ts_ls", "tinymist" },
-			})
+            -- `K` is gk (see keymaps.lua), so hover lives on ,k
+            vim.keymap.set("n", "<leader>k", vim.lsp.buf.hover, { desc = "Hover docs" })
+            vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
+            vim.keymap.set({ "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
+        end,
+    },
 
-			-- CRITICAL: Get capabilities from blink.cmp to enable LSP completion
-			local capabilities = require("blink.cmp").get_lsp_capabilities()
+    -- Lua LSP knows about the Neovim API while editing this config.
+    { "folke/lazydev.nvim", ft = "lua", opts = {} },
 
-			-- Setup all LSPs cleanly in a loop using Neovim 0.11+ native API
-			local servers = { "pyright", "clangd", "ts_ls", "tinymist" }
-			for _, server in ipairs(servers) do
-				-- 1. Apply capabilities via native config
-				vim.lsp.config(server, {
-					capabilities = capabilities,
-				})
-				-- 2. Enable the server natively
-				vim.lsp.enable(server)
-			end
+    {
+        "saghen/blink.cmp",
+        version = "1.*",
+        event = { "InsertEnter", "CmdlineEnter" },
+        dependencies = { "L3MON4D3/LuaSnip" },
+        ---@module 'blink.cmp'
+        ---@type blink.cmp.Config
+        opts = {
+            keymap = {
+                preset = "enter",
+                ["<S-Tab>"] = { "select_prev", "fallback" },
+                ["<Tab>"] = { "select_next", "fallback" },
+            },
+            appearance = { nerd_font_variant = "mono" },
+            snippets = { preset = "luasnip" },
+            completion = {
+                documentation = { auto_show = true, auto_show_delay_ms = 200 },
+                menu = { border = "rounded" },
+            },
+            cmdline = {
+                keymap = { preset = "cmdline" },
+                sources = function()
+                    local t = vim.fn.getcmdtype()
+                    if t == "/" or t == "?" then return { "buffer" } end
+                    if t == ":" then return { "cmdline" } end
+                    return {}
+                end,
+            },
+            sources = {
+                default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+                providers = {
+                    lazydev = { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 },
+                },
+            },
+            fuzzy = { implementation = "prefer_rust_with_warning" },
+        },
+        opts_extend = { "sources.default" },
+    },
 
-			-- pyright resolves imports statically; hand it each project's
-			-- import roots (root + nested package dirs) so subdir packages
-			-- resolve everywhere without a per-project pyrightconfig.json.
-			vim.lsp.config("pyright", {
-				capabilities = capabilities,
-				before_init = function(init_params, config)
-					local root = config.root_dir
-						or (init_params.rootUri and vim.uri_to_fname(init_params.rootUri))
-					if not root then
-						return
-					end
-					config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
-						python = { analysis = { extraPaths = py_extra_paths(root) } },
-					})
-				end,
-			})
+    {
+        "stevearc/conform.nvim",
+        cmd = "ConformInfo",
+        opts = {
+            formatters_by_ft = {
+                c = { "clang_format" },
+                cpp = { "clang_format" },
+                python = { "ruff_organize_imports", "ruff_format" },
+                lua = { "stylua" },
+                typst = { "typstyle" },
+            },
+            formatters = {
+                stylua = { prepend_args = { "--indent-type", "Spaces", "--indent-width", "4" } },
+            },
+        },
+    },
 
-			-- Show diagnostics in a floating window on CursorHold
-			vim.api.nvim_create_autocmd("CursorHold", {
-				pattern = "*",
-				callback = function()
-					vim.diagnostic.open_float(nil, { focus = false, scope = "line" })
-				end,
-			})
-
-			-- Diagnostic configuration
-			vim.diagnostic.config({
-				virtual_text = true,
-				float = { border = "rounded" },
-				update_in_insert = false,
-				severity_sort = true,
-			})
-
-			-- Useful LSP keymaps
-			-- `K` is remapped to `gk` in config/keymaps.lua, so hover lives on <leader>k.
-			vim.keymap.set("n", "<leader>k", vim.lsp.buf.hover, { desc = "LSP Hover" })
-			vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "LSP Go Definition" })
-			vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "LSP References" })
-			vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "LSP Rename" })
-			vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
-		end,
-	},
-	{
-		"nvim-treesitter/nvim-treesitter",
-		-- The legacy `master` branch is archived and crashes on Neovim 0.12
-		-- (broken `set-lang-from-info-string!` directive). `main` is the
-		-- supported branch for Neovim 0.11+.
-		branch = "main",
-		lazy = false,
-		build = ":TSUpdate",
-		config = function()
-			-- The `main` branch compiles parsers with the `tree-sitter` CLI.
-			-- Skip the install when it is missing so startup stays error-free;
-			-- `markdown`/`markdown_inline` already ship with Neovim.
-			if vim.fn.executable("tree-sitter") == 1 then
-				require("nvim-treesitter").install({ "yaml", "json" })
-			end
-
-			-- The `main` branch no longer auto-enables highlighting;
-			-- opt in per filetype via `vim.treesitter.start()`.
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = { "yaml", "json", "markdown" },
-				callback = function()
-					pcall(vim.treesitter.start)
-				end,
-			})
-		end,
-	},
+    {
+        -- `main` branch (the archived `master` breaks on 0.12). Needs the tree-sitter CLI.
+        "nvim-treesitter/nvim-treesitter",
+        branch = "main",
+        lazy = false,
+        build = ":TSUpdate",
+        config = function()
+            local langs = {
+                "bash", "c", "cpp", "python", "lua", "vim", "vimdoc", "query",
+                "javascript", "typescript", "tsx", "json", "yaml", "toml",
+                "markdown", "markdown_inline", "typst", "latex", "bibtex",
+                "regex", "diff", "gitcommit", "git_rebase",
+            }
+            if vim.fn.executable("tree-sitter") == 1 then
+                require("nvim-treesitter").install(langs)
+            end
+            -- Start treesitter highlighting for any buffer that has a parser.
+            vim.api.nvim_create_autocmd("FileType", {
+                callback = function(ev) pcall(vim.treesitter.start, ev.buf) end,
+            })
+        end,
+    },
 }

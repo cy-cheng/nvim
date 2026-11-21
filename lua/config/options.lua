@@ -1,23 +1,38 @@
 -- options.lua
+local o = vim.opt
 
-vim.opt.encoding = "utf-8"
-vim.opt.fileencodings = "ucs-bom,utf-8,gbk,big5,gb18030,default,latin1"
+o.encoding = "utf-8"
+o.fileencodings = "ucs-bom,utf-8,gbk,big5,gb18030,default,latin1"
 
--- Line number settings
-vim.opt.cursorline = true
-vim.opt.cursorlineopt = "both"
-vim.opt.number = true -- Absolute line numbers
-vim.opt.relativenumber = true -- Relative line numbers
-vim.opt.updatetime = 500 -- Faster completion
+-- Line numbers
+o.number = true
+o.relativenumber = true
+o.cursorline = true
+o.cursorlineopt = "both"
+o.signcolumn = "yes"
+o.updatetime = 500
 
--- Indentation settings
-vim.opt.tabstop = 4 -- Sets the width of a tab to 4 spaces
-vim.opt.shiftwidth = 4 -- Indentation level of 4 spaces
-vim.opt.softtabstop = 4 -- Inserts 4 spaces for each tab
-vim.opt.scrolloff = 10 -- Keeps 10 lines visible when scrolling
-vim.opt.smartindent = true -- Automatically smart-indents new lines
-vim.opt.expandtab = true
+-- Indentation (guess-indent overrides per file)
+o.tabstop = 4
+o.shiftwidth = 4
+o.softtabstop = 4
+o.expandtab = true
+o.smartindent = true
+o.scrolloff = 10
 
-vim.opt.splitbelow = true -- Set the split window to be below the current window
-vim.opt.splitright = true -- Set the split window to be right of the current window
+-- Splits: agents open on the right, terminals below
+o.splitbelow = true
+o.splitright = true
 
+-- Quality of life
+o.mouse = "a"
+o.termguicolors = true
+o.undofile = true
+o.ignorecase = true
+o.smartcase = true
+o.laststatus = 3 -- one global statusline; agent splits stay clean
+o.showmode = false
+o.confirm = true
+
+-- Agents edit files behind your back: pick up their changes automatically.
+o.autoread = true

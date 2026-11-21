@@ -1,49 +1,39 @@
--- File: lua/config/compile.lua
-
+-- compile.lua — ,r saves, compiles and runs the current file in a right split.
 local M = {}
 
--- Define commands for each file type in a table
+local q = vim.fn.shellescape
+
+-- Each entry gets the file path (relative) and returns a shell command.
 local commands = {
-    cpp = function(filename)
-        local output = filename:gsub("%.%w+$", "")
-        return "g++ " .. filename .. " -DLOCAL -o" .. output .. " && ./" .. output
+    cpp = function(f)
+        local out = f:gsub("%.%w+$", "")
+        return ("g++ %s -DLOCAL -o %s && %s"):format(q(f), q(out), q("./" .. out))
     end,
-    c = function(filename)
-        local output = filename:gsub("%.%w+$", "")
-        return "gcc " .. filename .. " -DLOCAL -o" .. output .. " && ./" .. output
+    c = function(f)
+        local out = f:gsub("%.%w+$", "")
+        return ("gcc %s -DLOCAL -o %s && %s"):format(q(f), q(out), q("./" .. out))
     end,
-    python = function(filename)
-        return "python3 " .. filename
-    end,
-    javascript = function(filename)
-        return "node " .. filename
-    end,
-    -- Add more file types and commands here as needed
+    python = function(f) return "python3 " .. q(f) end,
+    javascript = function(f) return "node " .. q(f) end,
+    sh = function(f) return "bash " .. q(f) end,
+    typst = function(f) return "typst compile " .. q(f) end,
 }
 
--- Function to compile and run the current file
 function M.compile_and_run()
-    local filetype = vim.bo.filetype
-    local filename = vim.fn.expand("%")
-
-    -- Retrieve the command for the current filetype
-    local cmd_func = commands[filetype]
-    if cmd_func then
-        -- Open a terminal on the right and execute the command
-        vim.cmd("rightbelow vsplit | terminal " .. cmd_func(filename))
-    else
-        print("File type '" .. filetype .. "' is not supported for compilation.")
+    local cmd = commands[vim.bo.filetype]
+    if not cmd then
+        vim.notify("No run command for filetype '" .. vim.bo.filetype .. "'", vim.log.levels.WARN)
+        return
     end
+    vim.cmd("write")
+    vim.cmd("rightbelow vsplit")
+    vim.cmd.terminal(cmd(vim.fn.expand("%")))
+    vim.cmd("startinsert")
 end
 
--- Setup function to configure keybinding and command
 function M.setup()
-    -- Define the custom command :CompileAndRun
     vim.api.nvim_create_user_command("CompileAndRun", M.compile_and_run, {})
-
-    -- Define the keybinding to trigger :CompileAndRun
-    vim.api.nvim_set_keymap("n", "<leader>r", ":w<CR>:CompileAndRun<CR>i", { noremap = true, silent = true })
+    vim.keymap.set("n", "<leader>r", M.compile_and_run, { desc = "Compile & run file" })
 end
 
 return M
-
