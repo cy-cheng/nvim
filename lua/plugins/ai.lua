@@ -14,10 +14,6 @@
 --     ,ap  pick a prompt (explain, fix diagnostics, review, tests, ...)
 --     <C-.> jump between the code and the agent
 --     Sessions run inside tmux, so they keep going after Neovim closes.
---
---   Copilot
---     <C-j>  (insert) accept ghost-text suggestion
---     <Tab>  (normal) jump to / apply next-edit suggestion, otherwise "A" as before
 
 return {
     {
@@ -46,21 +42,13 @@ return {
         "folke/sidekick.nvim",
         event = "VeryLazy",
         opts = {
+            nes = { enabled = false }, -- next-edit suggestions need Copilot
+            copilot = { status = { enabled = false } },
             cli = {
                 mux = { backend = "tmux", enabled = true },
             },
         },
         keys = {
-            {
-                "<Tab>",
-                function()
-                    if not require("sidekick").nes_jump_or_apply() then
-                        return "A"
-                    end
-                end,
-                expr = true,
-                desc = "Next edit suggestion / append",
-            },
             {
                 "<C-.>",
                 function() require("sidekick.cli").toggle() end,

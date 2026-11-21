@@ -1,8 +1,7 @@
 -- lsp.lua — language servers (native vim.lsp.config), completion, formatting, treesitter
 
 -- Servers Mason installs and mason-lspconfig enables automatically.
--- "copilot" = GitHub's copilot-language-server: inline suggestions + sidekick's next-edit suggestions.
-local servers = { "pyright", "ruff", "clangd", "ts_ls", "tinymist", "lua_ls", "copilot" }
+local servers = { "pyright", "ruff", "clangd", "ts_ls", "tinymist", "lua_ls" }
 
 -- Discover Python import roots for a project: the project root itself plus any
 -- immediate child dir that holds a package (has a subdir with __init__.py).
@@ -57,14 +56,6 @@ return {
                 ensure_installed = servers,
                 automatic_enable = true,
             })
-
-            -- Copilot ghost text (Neovim 0.12 native). Accept with <C-j> in insert mode.
-            vim.lsp.inline_completion.enable(true)
-            vim.keymap.set("i", "<C-j>", function()
-                if not vim.lsp.inline_completion.get() then
-                    return "<C-j>"
-                end
-            end, { expr = true, desc = "Accept Copilot suggestion" })
 
             vim.diagnostic.config({
                 virtual_text = true,

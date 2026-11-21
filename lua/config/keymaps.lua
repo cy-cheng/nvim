@@ -13,7 +13,7 @@ end, {})
 -- General
 map("i", "jk", "<Esc>", opts)
 map("i", "{<S-CR>", "{<CR>}<Esc>ko", opts)
--- <Tab> in normal mode = "A" (or apply a Copilot next-edit suggestion; see plugins/ai.lua)
+map("n", "<Tab>", "A", opts)
 
 map({ "n", "v" }, "H", "b", opts)
 map({ "n", "v" }, "J", "gj", opts)

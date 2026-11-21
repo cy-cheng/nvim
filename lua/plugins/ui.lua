@@ -1,7 +1,5 @@
 -- ui.lua — theme, statusline, buffer tabs, which-key, snacks (pickers, explorer, notifications)
 
-local muted = "#b8ab9b"
-
 return {
     -- Your original theme: transparent tokyonight + the highlights from the old ui.lua
     {
@@ -63,23 +61,7 @@ return {
                 lualine_a = { "mode" },
                 lualine_b = { "branch", "diff" },
                 lualine_c = { { "filename", path = 1 }, "diagnostics" },
-                lualine_x = {
-                    -- Copilot status from sidekick (shows when Copilot is busy/offline)
-                    {
-                        function() return " " end,
-                        cond = function()
-                            local ok, status = pcall(require, "sidekick.status")
-                            return ok and status.get() ~= nil
-                        end,
-                        color = function()
-                            local s = require("sidekick.status").get()
-                            if s and s.kind == "Error" then return { fg = "#ff5c57" } end
-                            if s and s.busy then return { fg = "#FFA500" } end
-                            return { fg = muted }
-                        end,
-                    },
-                    "filetype",
-                },
+                lualine_x = { "filetype" },
                 lualine_y = { "progress" },
                 lualine_z = { "location" },
             },
