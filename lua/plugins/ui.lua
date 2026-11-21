@@ -1,43 +1,51 @@
 -- ui.lua — theme, statusline, buffer tabs, which-key, snacks (pickers, explorer, notifications)
 
--- Nixie desktop palette (near-black + amber), used for highlight overrides.
-local nixie = {
-    amber = "#ffac32",
-    amber_dim = "#c97824",
-    orange = "#d6923f",
-    fg = "#e8ded1",
-    muted = "#b8ab9b",
-    line = "#2a2118",
-}
+local muted = "#b8ab9b"
 
 return {
+    -- Your original theme: transparent tokyonight + the highlights from the old ui.lua
     {
-        "rebelot/kanagawa.nvim",
+        "folke/tokyonight.nvim",
         lazy = false,
         priority = 1000,
         config = function()
-            require("kanagawa").setup({
-                theme = "dragon", -- the warm, low-contrast variant
-                transparent = true, -- let kitty's blur show through
-                colors = { theme = { all = { ui = { bg_gutter = "none" } } } },
-                overrides = function()
-                    return {
-                        CursorLine = { bg = nixie.line },
-                        CursorLineNr = { fg = nixie.amber, bold = true },
-                        LineNrAbove = { fg = "#7a6f62" },
-                        LineNrBelow = { fg = "#7a6f62" },
-                        Visual = { fg = "#000000", bg = nixie.amber_dim },
-                        Comment = { fg = "#8f8579", italic = true },
-                        NormalFloat = { bg = "none" },
-                        FloatBorder = { fg = nixie.amber_dim, bg = "none" },
-                        FloatTitle = { fg = nixie.amber, bg = "none", bold = true },
-                        WinSeparator = { fg = "#3a2f24" },
-                        Heading = { fg = nixie.amber, bg = "#333333" },
-                    }
+            require("tokyonight").setup({
+                transparent = true,
+                styles = { sidebars = "transparent", floats = "transparent" },
+                on_highlights = function(hl)
+                    hl.Comment = { fg = "#999999", italic = true }
+                    hl.LineNrAbove = { fg = "#999999" }
+                    hl.LineNrBelow = { fg = "#999999" }
+                    hl.CursorLineNr = { fg = "#FFA500" }
+                    hl.CursorLine = { bg = "#554433" }
+                    hl.Visual = { fg = "#000000", bg = "#FFA500" }
+                    hl.Heading = { fg = "#FFA500", bg = "#333333" }
                 end,
             })
-            vim.cmd.colorscheme("kanagawa")
+            vim.cmd.colorscheme("tokyonight")
         end,
+    },
+
+    -- Command line, search and messages in a popup in the middle (as before)
+    {
+        "folke/noice.nvim",
+        event = "VeryLazy",
+        dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
+        opts = {
+            presets = { lsp_doc_border = true },
+            routes = {
+                { filter = { event = "msg_showmode" }, opts = { skip = true } },
+            },
+        },
+        keys = {
+            { "<leader>nh", "<cmd>Noice dismiss<CR>", desc = "Dismiss notifications" },
+            { "<leader>nn", "<cmd>Noice history<CR>", desc = "Notification history" },
+        },
+    },
+    {
+        "rcarriga/nvim-notify",
+        lazy = true,
+        opts = { top_down = false },
     },
 
     {
@@ -66,8 +74,8 @@ return {
                         color = function()
                             local s = require("sidekick.status").get()
                             if s and s.kind == "Error" then return { fg = "#ff5c57" } end
-                            if s and s.busy then return { fg = nixie.amber } end
-                            return { fg = nixie.muted }
+                            if s and s.busy then return { fg = "#FFA500" } end
+                            return { fg = muted }
                         end,
                     },
                     "filetype",
@@ -131,7 +139,7 @@ return {
             bigfile = { enabled = true },
             quickfile = { enabled = true },
             input = { enabled = true },
-            notifier = { enabled = true, top_down = false },
+            notifier = { enabled = false }, -- noice + nvim-notify handle messages
             indent = { enabled = true, indent = { char = "┃" }, scope = { char = "┃" } },
             scope = { enabled = true },
             words = { enabled = true },
@@ -155,9 +163,6 @@ return {
             { "<Space>w", function() Snacks.picker.grep_word() end, desc = "Word under cursor", mode = { "n", "x" } },
             { "<Space>k", function() Snacks.picker.keymaps() end, desc = "Keymaps" },
             { "<Space>.", function() Snacks.picker.resume() end, desc = "Resume last picker" },
-            -- notifications
-            { "<leader>nh", function() Snacks.notifier.hide() end, desc = "Dismiss notifications" },
-            { "<leader>nn", function() Snacks.picker.notifications() end, desc = "Notification history" },
             -- LSP navigation through the picker
             { "gd", function() Snacks.picker.lsp_definitions() end, desc = "Go to definition" },
             { "gr", function() Snacks.picker.lsp_references() end, nowait = true, desc = "References" },
